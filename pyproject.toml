@@ -3,7 +3,7 @@ requires = ["hatchling>=1.20"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ascii-moon-phase"
+name = "ascii_moon_phase"
 version = "0.1.0"
 description = "Render the current lunar phase as filled ASCII art (@ for light, . for dark)."
 readme = "README.md"
@@ -27,8 +27,8 @@ classifiers = [
 # dependencies = ["somepackage>=1.0"]
 
 [project.urls]
-Homepage = "https://github.com/yourname/ascii-moon-phase"
-Issues = "https://github.com/yourname/ascii-moon-phase/issues"
+Homepage = "https://github.com/yourname/ascii-moon-phase-python"
+Issues = "https://github.com/yourname/ascii-moon-phase-python/issues"
 
 # Command-line entry point (optional but handy):
 # Create ascii_moon_phase/__main__.py with a main() function.

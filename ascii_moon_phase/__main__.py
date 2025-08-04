@@ -2,7 +2,7 @@
 from __future__ import annotations
 import argparse
 from datetime import date
-from . import render_moon, render_moon_with_phase, moon_phase
+from . import render_moon, moon_phase
 
 def _parse_date(s: str) -> date:
     try:
@@ -40,26 +40,16 @@ def main() -> None:
 
     northern = (args.hemisphere == "north")
 
-    if args.phase is not None:
-        moon_str = render_moon_with_phase(
-            size=args.size,
-            northern_hemisphere=northern,
-            phase=args.phase,
-            light_char=args.light_char,
-            dark_char=args.dark_char,
-            empty_char=args.empty_char,
-        )
-        p = args.phase
-    else:
-        moon_str = render_moon(
-            size=args.size,
-            northern_hemisphere=northern,
-            phase_date=args.date,
-            light_char=args.light_char,
-            dark_char=args.dark_char,
-            empty_char=args.empty_char,
-        )
-        p = moon_phase(args.date)
+    moon_str = render_moon(
+        size=args.size,
+        northern_hemisphere=northern,
+        phase_date=args.date,
+        light_char=args.light_char,
+        dark_char=args.dark_char,
+        empty_char=args.empty_char,
+        phase=args.phase,
+    )
+    p = moon_phase(args.date)
 
     print(moon_str)
 
