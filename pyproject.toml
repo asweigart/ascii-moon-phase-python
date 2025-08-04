@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling>=1.20"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ascii-moon-phase"
+version = "0.1.0"
+description = "Render the current lunar phase as filled ASCII art (@ for light, . for dark)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Your Name", email = "you@example.com" }
+]
+keywords = ["moon", "lunar", "phase", "ascii", "art", "terminal"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Developers",
+  "Environment :: Console",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Terminals"
+]
+
+# If you add dependencies in the future, list them here, e.g.:
+# dependencies = ["somepackage>=1.0"]
+
+[project.urls]
+Homepage = "https://github.com/yourname/ascii-moon-phase"
+Issues = "https://github.com/yourname/ascii-moon-phase/issues"
+
+# Command-line entry point (optional but handy):
+# Create ascii_moon_phase/__main__.py with a main() function.
+[project.scripts]
+ascii-moon = "ascii_moon_phase.__main__:main"
+
+[tool.hatch.build]
+# Include the package and common top-level files in the sdist/wheel
+include = [
+  "/ascii_moon_phase",
+  "/README.md",
+  "/LICENSE"
+]
+
+[tool.hatch.build.targets.wheel]
+# Point to your package directory
+packages = ["ascii_moon_phase"]
