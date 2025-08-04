@@ -6,15 +6,13 @@ API:
 - moon_phase(phase_date: date | None) -> float in [0.0, 1.0]
 - render_moon(size=24, northern_hemisphere=True, phase_date=None,
               light_char='@', dark_char='.', empty_char=' ') -> str
-- render_moon_with_phase(size, northern_hemisphere, phase,
-              light_char='@', dark_char='.', empty_char=' ') -> str
 """
 
 from __future__ import annotations
 import math
 from datetime import date, datetime, timezone
 
-__all__ = ["moon_phase", "render_moon", "render_moon_with_phase"]
+__all__ = ["moon_phase", "render_moon"]
 
 SYNODIC_MONTH = 29.530588853  # days
 REF_JD = 2451550.1            # Julian Day number near a new moon (2000-01-06 18:14 UTC)
@@ -32,7 +30,7 @@ def _julian_day(dt_utc: datetime) -> float:
 
 def moon_phase(phase_date: date | None = None) -> float:
     """
-    Return lunar phase fraction p ∈ [0.0, 1.0]:
+    Return lunar phase fraction p = [0.0, 1.0]:
       0.0 = new, 0.5 = full, 1.0 = new (again).
       0.0..0.5 waxing; 0.5..1.0 waning.
 
@@ -86,23 +84,15 @@ def render_moon(
     size: int = 24,
     northern_hemisphere: bool = True,
     phase_date: date | None = None,
-    *,
     light_char: str = "@",
     dark_char: str = ".",
     empty_char: str = " ",
+    phase: float | None = None,
+
 ) -> str:
     """Render from a calendar date (None ⇒ today)."""
-    p = moon_phase(phase_date)
+    if phase is None:
+        p = moon_phase(phase_date)
+    else:
+        p = phase
     return _render_core(size, northern_hemisphere, p, light_char, dark_char, empty_char)
-
-def render_moon_with_phase(
-    size: int,
-    northern_hemisphere: bool,
-    phase: float,
-    *,
-    light_char: str = "@",
-    dark_char: str = ".",
-    empty_char: str = " ",
-) -> str:
-    """Render directly from a phase fraction in [0.0, 1.0]."""
-    return _render_core(size, northern_hemisphere, phase, light_char, dark_char, empty_char)
