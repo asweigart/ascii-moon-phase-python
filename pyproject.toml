@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ascii_moon_phase"
-version = "0.1.0"
-description = "Render the current lunar phase as filled ASCII art (@ for light, . for dark)."
+version = "0.2.0"
+description = "Display the current lunar phase as ASCII art."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }

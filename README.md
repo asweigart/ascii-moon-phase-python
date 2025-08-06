@@ -61,4 +61,8 @@ The parameters of `render_moon()` are:
 
     ) -> str:
 
+
+You can also call `animate_phases()` to play a smooth animation of the moon, or call `animate_future()` to show the phase of each day progressing into the future.
+
+
 The Rust version is at [https://github.com/asweigart/ascii-moon-phase-rust](https://github.com/asweigart/ascii-moon-phase-rust)

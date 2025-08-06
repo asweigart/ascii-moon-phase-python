@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """
-ascii_moon_phase: render the lunar phase as filled ASCII art.
+ascii_moon_phase: Display the current lunar phase as ASCII art.
 
 API:
 - moon_phase(phase_date: date | None) -> float in [0.0, 1.0]
 - render_moon(size=24, northern_hemisphere=True, phase_date=None,
               light_char='@', dark_char='.', empty_char=' ') -> str
+- animate_phases(delay=0.05)
+- animate_future(delay=0.2)
 """
 
 from __future__ import annotations
 import math
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 
-__all__ = ["moon_phase", "render_moon"]
+__all__ = ["moon_phase", "render_moon", "animate_phases", "animate_future"]
 
 SYNODIC_MONTH = 29.530588853  # days
 REF_JD = 2451550.1            # Julian Day number near a new moon (2000-01-06 18:14 UTC)
@@ -96,3 +98,29 @@ def render_moon(
     else:
         p = phase
     return _render_core(size, northern_hemisphere, p, light_char, dark_char, empty_char)
+
+
+def animate_phases(delay=0.05):
+    import os, time
+    try:
+        while True:
+            for i in range(200):
+                p = i / 200
+                print(render_moon(phase=p))
+                time.sleep(delay)
+                os.system('cls' if os.name == 'nt' else 'clear')
+    except KeyboardInterrupt:
+        pass
+
+def animate_future(delay=0.2):
+    import os, time
+    try:
+        dt = date.today()
+        while True:
+            print(render_moon(phase_date=dt))
+            print(dt.strftime('%a %b %d, %Y'))
+            time.sleep(delay)
+            os.system('cls' if os.name == 'nt' else 'clear')
+            dt += timedelta(days=1)
+    except KeyboardInterrupt:
+        pass
