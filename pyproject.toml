@@ -4,20 +4,17 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ascii_moon_phase"
-version = "0.2.0"
+version = "0.3.0"
 description = "Display the current lunar phase as ASCII art."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.6"
 license = { file = "LICENSE" }
 authors = [
-  { name = "Your Name", email = "you@example.com" }
+  { name = "Al Sweigart", email = "al@inventwithpython.com" }
 ]
 keywords = ["moon", "lunar", "phase", "ascii", "art", "terminal"]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3 :: Only",
-  "License :: OSI Approved :: MIT License",
-  "Intended Audience :: Developers",
   "Environment :: Console",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Terminals"
@@ -27,8 +24,8 @@ classifiers = [
 # dependencies = ["somepackage>=1.0"]
 
 [project.urls]
-Homepage = "https://github.com/yourname/ascii-moon-phase-python"
-Issues = "https://github.com/yourname/ascii-moon-phase-python/issues"
+Homepage = "https://github.com/asweigart/ascii-moon-phase-python"
+Issues = "https://github.com/asweigart/ascii-moon-phase-python/issues"
 
 # Command-line entry point (optional but handy):
 # Create ascii_moon_phase/__main__.py with a main() function.
@@ -40,7 +37,6 @@ ascii-moon = "ascii_moon_phase.__main__:main"
 include = [
   "/ascii_moon_phase",
   "/README.md",
-  "/LICENSE"
 ]
 
 [tool.hatch.build.targets.wheel]

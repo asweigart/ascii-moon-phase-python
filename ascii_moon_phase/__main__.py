@@ -2,7 +2,7 @@
 from __future__ import annotations
 import argparse
 from datetime import date
-from . import render_moon, moon_phase
+from . import render_moon, date_to_moon_phase
 
 def _parse_date(s: str) -> date:
     try:
@@ -49,7 +49,7 @@ def main() -> None:
         empty_char=args.empty_char,
         phase=args.phase,
     )
-    p = moon_phase(args.date)
+    p = date_to_moon_phase(args.date)
 
     print(moon_str)
 

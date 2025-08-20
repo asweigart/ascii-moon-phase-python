@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
 """
-ascii_moon_phase: Display the current lunar phase as ASCII art.
+ascii_moon_phase: Display the current moon phase as ASCII art.
 
 API:
-- moon_phase(phase_date: date | None) -> float in [0.0, 1.0]
+- date_to_moon_phase(phase_date: date | None) -> float in [0.0, 1.0]
 - render_moon(size=24, northern_hemisphere=True, phase_date=None,
               light_char='@', dark_char='.', empty_char=' ') -> str
 - animate_phases(delay=0.05)
@@ -14,7 +13,7 @@ from __future__ import annotations
 import math
 from datetime import date, datetime, timezone, timedelta
 
-__all__ = ["moon_phase", "render_moon", "animate_phases", "animate_future"]
+__all__ = ["date_to_moon_phase", "render_moon", "animate_phases", "animate_future"]
 
 SYNODIC_MONTH = 29.530588853  # days
 REF_JD = 2451550.1            # Julian Day number near a new moon (2000-01-06 18:14 UTC)
@@ -30,7 +29,8 @@ def _julian_day(dt_utc: datetime) -> float:
     B = 2 - A + A // 4
     return int(365.25 * (y + 4716)) + int(30.6001 * (m + 1)) + d + B - 1524.5
 
-def moon_phase(phase_date: date | None = None) -> float:
+
+def date_to_moon_phase(phase_date: date | None = None) -> float:
     """
     Return lunar phase fraction p = [0.0, 1.0]:
       0.0 = new, 0.5 = full, 1.0 = new (again).
@@ -44,14 +44,21 @@ def moon_phase(phase_date: date | None = None) -> float:
     p = ((_julian_day(dt_utc) - REF_JD) / SYNODIC_MONTH) % 1.0
     return p
 
-def _render_core(
-    size: int,
-    northern_hemisphere: bool,
-    phase: float,
-    light_char: str,
-    dark_char: str,
-    empty_char: str,
+
+def render_moon(
+    size: int = 24,
+    northern_hemisphere: bool = True,
+    phase_date: date | None = None,
+    light_char: str = "@",
+    dark_char: str = ".",
+    empty_char: str = " ",
+    phase: float | None = None,
+
 ) -> str:
+    """Render from a calendar date."""
+    if phase is None:
+        phase = date_to_moon_phase(phase_date)
+
     if size < 2:
         raise ValueError("size must be at least 2")
     if not (0.0 <= phase <= 1.0):
@@ -82,25 +89,9 @@ def _render_core(
         rows.append("".join(row))
     return "\n".join(rows)
 
-def render_moon(
-    size: int = 24,
-    northern_hemisphere: bool = True,
-    phase_date: date | None = None,
-    light_char: str = "@",
-    dark_char: str = ".",
-    empty_char: str = " ",
-    phase: float | None = None,
-
-) -> str:
-    """Render from a calendar date (None ⇒ today)."""
-    if phase is None:
-        p = moon_phase(phase_date)
-    else:
-        p = phase
-    return _render_core(size, northern_hemisphere, p, light_char, dark_char, empty_char)
-
 
 def animate_phases(delay=0.05):
+    """Play an animation of the phases of the moon. (Uses cls/clear to clear the screen.)"""
     import os, time
     try:
         while True:
@@ -113,6 +104,7 @@ def animate_phases(delay=0.05):
         pass
 
 def animate_future(delay=0.2):
+    """Play an animation of the phases of the moon for each day in the future. (Uses cls/clear to clear the screen.)"""
     import os, time
     try:
         dt = date.today()
