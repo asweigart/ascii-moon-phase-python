@@ -90,7 +90,12 @@ def render_moon(
     return "\n".join(rows)
 
 
-def animate_phases(size=24, northern_hemisphere=True, light_char="@", dark_char=".", empty_char=" ", delay=0.05):
+def animate_phases(size: int = 24,
+    northern_hemisphere: bool = True,
+    light_char: str = "@",
+    dark_char: str = ".",
+    empty_char: str = " ",
+    delay: float = 0.05):
     """Play an animation of the phases of the moon. (Uses cls/clear to clear the screen.)"""
     import os, time
     try:
@@ -103,7 +108,12 @@ def animate_phases(size=24, northern_hemisphere=True, light_char="@", dark_char=
     except KeyboardInterrupt:
         pass
 
-def animate_future(size=24, northern_hemisphere=True, light_char="@", dark_char=".", empty_char=" ", delay=0.2):
+def animate_future(size: int = 24,
+    northern_hemisphere: bool = True,
+    light_char: str = "@",
+    dark_char: str = ".",
+    empty_char: str = " ",
+    delay: float = 0.2):
     """Play an animation of the phases of the moon for each day in the future. (Uses cls/clear to clear the screen.)"""
     import os, time
     try:
