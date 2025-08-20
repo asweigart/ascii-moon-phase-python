@@ -2,7 +2,8 @@
 from __future__ import annotations
 import argparse
 from datetime import date
-from . import render_moon, date_to_moon_phase
+from . import render_moon, date_to_moon_phase, animate_phases, animate_future
+
 
 def _parse_date(s: str) -> date:
     try:
@@ -10,6 +11,7 @@ def _parse_date(s: str) -> date:
         return date(int(y), int(m), int(d))
     except Exception as e:
         raise argparse.ArgumentTypeError(f"Invalid date {s!r}; expected YYYY-MM-DD") from e
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -32,9 +34,31 @@ def main() -> None:
                         help="Character outside the disc (default: space).")
     parser.add_argument("--show-phase", action="store_true",
                         help="Print the numeric phase after the art.")
+    parser.add_argument("--phases", action="store_true",
+                        help="Animate the full cycle of lunar phases.")
+    parser.add_argument("--future", action="store_true",
+                        help="Animate upcoming lunar phases.")
 
     args = parser.parse_args()
 
+    # Handle special animation flags
+    if args.phases:
+        animate_phases(size=args.size,
+                       northern_hemisphere=(args.hemisphere == "north"),
+                       light_char=args.light_char,
+                       dark_char=args.dark_char,
+                       empty_char=args.empty_char)
+        return
+
+    if args.future:
+        animate_future(size=args.size,
+                       northern_hemisphere=(args.hemisphere == "north"),
+                       light_char=args.light_char,
+                       dark_char=args.dark_char,
+                       empty_char=args.empty_char)
+        return
+
+    # Normal single moon rendering
     if args.phase is not None and not (0.0 <= args.phase <= 1.0):
         parser.error("--phase must be between 0.0 and 1.0")
 
@@ -61,6 +85,7 @@ def main() -> None:
         else:
             status = "waning"
         print(f"\nphase={p:.6f}  ({status})")
+
 
 if __name__ == "__main__":
     main()
