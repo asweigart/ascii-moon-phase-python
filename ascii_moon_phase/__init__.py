@@ -18,6 +18,9 @@ __all__ = ["date_to_moon_phase", "render_moon", "animate_phases", "animate_futur
 SYNODIC_MONTH = 29.530588853  # days
 REF_JD = 2451550.1            # Julian Day number near a new moon (2000-01-06 18:14 UTC)
 
+class AsciiMoonPhaseException(Exception):
+    pass
+
 def _julian_day(dt_utc: datetime) -> float:
     """Convert a UTC datetime to Julian Day."""
     y, m = dt_utc.year, dt_utc.month
@@ -56,36 +59,40 @@ def render_moon(
 
 ) -> str:
     """Render from a calendar date."""
+    if not isinstance(light_char, str) or len(light_char) != 1:
+        raise AsciiMoonPhaseException('light_char must be a single character str')
+    if not isinstance(light_char, str) or len(dark_char) != 1:
+            raise AsciiMoonPhaseException('dark_char must be a single character str')
+    if not isinstance(light_char, str) or len(empty_char) != 1:
+            raise AsciiMoonPhaseException('empty_char must be a single character str')
+    if size < 2:
+        raise AsciiMoonPhaseException("size must be 2 or larger")
+
     if phase is None:
         phase = date_to_moon_phase(phase_date)
-
-    if size < 2:
-        raise ValueError("size must be at least 2")
     if not (0.0 <= phase <= 1.0):
-        raise ValueError("phase must be in [0.0, 1.0]")
+        raise AsciiMoonPhaseException("phase must be between 0.0 and 1.0")
     height, width = size, size * 2
 
-    if not light_char or not dark_char or not empty_char:
-        raise ValueError("light_char, dark_char, and empty_char must be non-empty strings")
-    L, Dk, E = light_char[0], dark_char[0], empty_char[0]
-
-    theta = 2.0 * math.pi * phase            # 0=new, pi=full
+    theta = 2.0 * math.pi * phase  # 0=new, 2*pi=full
     sx = -math.sin(theta) if northern_hemisphere else math.sin(theta)
     sz = math.cos(theta)
 
     rows: list[str] = []
     for j in range(height):
-        y = 2.0 * ((j + 0.5) / height) - 1.0
+        y = 2.0 * ((j + 0.5) / height) - 1.0  # From -1.0 to 1.0, where j is on scale of 0 to height.
         row = []
         for i in range(width):
-            x = 2.0 * ((i + 0.5) / width) - 1.0
+            x = 2.0 * ((i + 0.5) / width) - 1.0  # From -1.0 to 1.0, where i is on scale of 0 to width.
             r2 = x * x + y * y
             if r2 <= 1.0:
+                # This space within the moon disk, place the light or dark character.
                 z = math.sqrt(max(0.0, 1.0 - r2))
-                lit = (sx * x + sz * z) < 0.0
-                row.append(L if lit else Dk)
+                is_light_space = (sx * x + sz * z) < 0  # This is the secret sauce i don't quite understand.
+                row.append(light_char if is_light_space else dark_char)
             else:
-                row.append(E)
+                # This space is beyond the moon disk, place the empty character.
+                row.append(empty_char)
         rows.append("".join(row))
     return "\n".join(rows)
 
@@ -126,3 +133,6 @@ def animate_future(size: int = 24,
             dt += timedelta(days=1)
     except KeyboardInterrupt:
         pass
+
+
+assert render_moon(phase_date=date(2025, 11, 23)) == '                 ............@@                 \n            .....................@@@            \n         ...........................@@@         \n       ..............................@@@@       \n     ..................................@@@@     \n    ....................................@@@@    \n   ......................................@@@@   \n  ........................................@@@@  \n .........................................@@@@@ \n ..........................................@@@@ \n...........................................@@@@@\n...........................................@@@@@\n...........................................@@@@@\n...........................................@@@@@\n ..........................................@@@@ \n .........................................@@@@@ \n  ........................................@@@@  \n   ......................................@@@@   \n    ....................................@@@@    \n     ..................................@@@@     \n       ..............................@@@@       \n         ...........................@@@         \n            .....................@@@            \n                 ............@@                 '
