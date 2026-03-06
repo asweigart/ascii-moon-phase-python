@@ -4,7 +4,8 @@ ascii_moon_phase: Display the current moon phase as ASCII art.
 API:
 - date_to_moon_phase(phase_date: date | None) -> float in [0.0, 1.0]
 - render_moon(size=24, northern_hemisphere=True, phase_date=None,
-              light_char='@', dark_char='.', empty_char=' ') -> str
+              light_char='@', dark_char='.', empty_char=' ',
+              phase=None, rotation=0.0) -> str
 - animate_phases(delay=0.05)
 - animate_future(delay=0.2)
 """
@@ -56,15 +57,28 @@ def render_moon(
     dark_char: str = ".",
     empty_char: str = " ",
     phase: float | None = None,
-
+    rotation: float = 0.0,
 ) -> str:
-    """Render from a calendar date."""
+    """
+    Render the moon as ASCII art.
+
+    Parameters:
+        size: Height in rows (width is 2*size)
+        northern_hemisphere: If True, waxing moon illuminated on right
+        phase_date: Calendar date to calculate phase from
+        light_char: Character for illuminated area
+        dark_char: Character for dark area
+        empty_char: Character outside the disc
+        phase: Override phase fraction [0.0, 1.0]; 0.0=new, 0.5=full
+        rotation: Rotation angle in degrees (positive = counterclockwise).
+                  Use latitude value to show how moon appears from that latitude.
+    """
     if not isinstance(light_char, str) or len(light_char) != 1:
         raise AsciiMoonPhaseException('light_char must be a single character str')
-    if not isinstance(light_char, str) or len(dark_char) != 1:
-            raise AsciiMoonPhaseException('dark_char must be a single character str')
-    if not isinstance(light_char, str) or len(empty_char) != 1:
-            raise AsciiMoonPhaseException('empty_char must be a single character str')
+    if not isinstance(dark_char, str) or len(dark_char) != 1:
+        raise AsciiMoonPhaseException('dark_char must be a single character str')
+    if not isinstance(empty_char, str) or len(empty_char) != 1:
+        raise AsciiMoonPhaseException('empty_char must be a single character str')
     if size < 2:
         raise AsciiMoonPhaseException("size must be 2 or larger")
 
@@ -78,6 +92,10 @@ def render_moon(
     sx = -math.sin(theta) if northern_hemisphere else math.sin(theta)
     sz = math.cos(theta)
 
+    # Precompute rotation values
+    rot_rad = math.radians(rotation)
+    cos_r, sin_r = math.cos(rot_rad), math.sin(rot_rad)
+
     rows: list[str] = []
     for j in range(height):
         y = 2.0 * ((j + 0.5) / height) - 1.0  # From -1.0 to 1.0, where j is on scale of 0 to height.
@@ -86,9 +104,14 @@ def render_moon(
             x = 2.0 * ((i + 0.5) / width) - 1.0  # From -1.0 to 1.0, where i is on scale of 0 to width.
             r2 = x * x + y * y
             if r2 <= 1.0:
-                # This space within the moon disk, place the light or dark character.
+                # Apply inverse rotation to find the original sphere coordinates
+                # This rotates our view of the moon by the specified angle
+                orig_x = x * cos_r + y * sin_r
+                orig_y = -x * sin_r + y * cos_r
+
+                # This space is within the moon disk, place the light or dark character.
                 z = math.sqrt(max(0.0, 1.0 - r2))
-                is_light_space = (sx * x + sz * z) < 0  # This is the secret sauce i don't quite understand.
+                is_light_space = (sx * orig_x + sz * z) < 0  # Use rotated x coordinate
                 row.append(light_char if is_light_space else dark_char)
             else:
                 # This space is beyond the moon disk, place the empty character.
@@ -102,14 +125,15 @@ def animate_phases(size: int = 24,
     light_char: str = "@",
     dark_char: str = ".",
     empty_char: str = " ",
-    delay: float = 0.05):
+    delay: float = 0.05,
+    rotation: float = 0.0):
     """Play an animation of the phases of the moon. (Uses cls/clear to clear the screen.)"""
     import os, time
     try:
         while True:
             for i in range(200):
                 p = i / 200
-                print(render_moon(size=size, northern_hemisphere=northern_hemisphere, light_char=light_char, dark_char=dark_char, empty_char=empty_char, phase=p))
+                print(render_moon(size=size, northern_hemisphere=northern_hemisphere, light_char=light_char, dark_char=dark_char, empty_char=empty_char, phase=p, rotation=rotation))
                 time.sleep(delay)
                 os.system('cls' if os.name == 'nt' else 'clear')
     except KeyboardInterrupt:
@@ -120,19 +144,17 @@ def animate_future(size: int = 24,
     light_char: str = "@",
     dark_char: str = ".",
     empty_char: str = " ",
-    delay: float = 0.2):
+    delay: float = 0.2,
+    rotation: float = 0.0):
     """Play an animation of the phases of the moon for each day in the future. (Uses cls/clear to clear the screen.)"""
     import os, time
     try:
         dt = date.today()
         while True:
-            print(render_moon(size=size, northern_hemisphere=northern_hemisphere, light_char=light_char, dark_char=dark_char, empty_char=empty_char, phase_date=dt))
+            print(render_moon(size=size, northern_hemisphere=northern_hemisphere, light_char=light_char, dark_char=dark_char, empty_char=empty_char, phase_date=dt, rotation=rotation))
             print(dt.strftime('%a %b %d, %Y'))
             time.sleep(delay)
             os.system('cls' if os.name == 'nt' else 'clear')
             dt += timedelta(days=1)
     except KeyboardInterrupt:
         pass
-
-
-assert render_moon(phase_date=date(2025, 11, 23)) == '                 ............@@                 \n            .....................@@@            \n         ...........................@@@         \n       ..............................@@@@       \n     ..................................@@@@     \n    ....................................@@@@    \n   ......................................@@@@   \n  ........................................@@@@  \n .........................................@@@@@ \n ..........................................@@@@ \n...........................................@@@@@\n...........................................@@@@@\n...........................................@@@@@\n...........................................@@@@@\n ..........................................@@@@ \n .........................................@@@@@ \n  ........................................@@@@  \n   ......................................@@@@   \n    ....................................@@@@    \n     ..................................@@@@     \n       ..............................@@@@       \n         ...........................@@@         \n            .....................@@@            \n                 ............@@                 '

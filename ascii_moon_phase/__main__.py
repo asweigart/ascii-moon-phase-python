@@ -38,8 +38,16 @@ def main() -> None:
                         help="Animate the full cycle of lunar phases.")
     parser.add_argument("--future", action="store_true",
                         help="Animate upcoming lunar phases.")
+    parser.add_argument("--lat", type=float, default=0.0, metavar="DEGREES",
+                        help="Observer latitude in degrees (-90 to 90). "
+                             "Rotates the moon to show how it appears from that latitude. "
+                             "Positive = North, Negative = South. Default: 0 (equator).")
 
     args = parser.parse_args()
+
+    # Validate latitude
+    if not (-90.0 <= args.lat <= 90.0):
+        parser.error("--lat must be between -90 and 90 degrees")
 
     # Handle special animation flags
     if args.phases:
@@ -47,7 +55,8 @@ def main() -> None:
                        northern_hemisphere=(args.hemisphere == "north"),
                        light_char=args.light_char,
                        dark_char=args.dark_char,
-                       empty_char=args.empty_char)
+                       empty_char=args.empty_char,
+                       rotation=args.lat)
         return
 
     if args.future:
@@ -55,7 +64,8 @@ def main() -> None:
                        northern_hemisphere=(args.hemisphere == "north"),
                        light_char=args.light_char,
                        dark_char=args.dark_char,
-                       empty_char=args.empty_char)
+                       empty_char=args.empty_char,
+                       rotation=args.lat)
         return
 
     # Normal single moon rendering
@@ -72,6 +82,7 @@ def main() -> None:
         dark_char=args.dark_char,
         empty_char=args.empty_char,
         phase=args.phase,
+        rotation=args.lat,
     )
     p = date_to_moon_phase(args.date)
 
