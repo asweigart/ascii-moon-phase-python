@@ -3,9 +3,9 @@ ascii_moon_phase: Display the current moon phase as ASCII art.
 
 API:
 - date_to_moon_phase(phase_date: date | None) -> float in [0.0, 1.0]
-- render_moon(size=24, northern_hemisphere=True, phase_date=None,
+- render_moon(size=24, rotation=0.0, phase_date=None,
               light_char='@', dark_char='.', empty_char=' ',
-              phase=None, rotation=0.0) -> str
+              phase=None) -> str
 - animate_phases(delay=0.05)
 - animate_future(delay=0.2)
 """
@@ -51,27 +51,25 @@ def date_to_moon_phase(phase_date: date | None = None) -> float:
 
 def render_moon(
     size: int = 24,
-    northern_hemisphere: bool = True,
+    rotation: float = 0.0,
     phase_date: date | None = None,
     light_char: str = "@",
     dark_char: str = ".",
     empty_char: str = " ",
     phase: float | None = None,
-    rotation: float = 0.0,
 ) -> str:
     """
     Render the moon as ASCII art.
 
     Parameters:
         size: Height in rows (width is 2*size)
-        northern_hemisphere: If True, waxing moon illuminated on right
+        rotation: Clockwise rotation in degrees. At 0 (default), phases move
+                  right to left. At 180, phases move left to right.
         phase_date: Calendar date to calculate phase from
         light_char: Character for illuminated area
         dark_char: Character for dark area
         empty_char: Character outside the disc
         phase: Override phase fraction [0.0, 1.0]; 0.0=new, 0.5=full
-        rotation: Rotation angle in degrees (positive = counterclockwise).
-                  Use latitude value to show how moon appears from that latitude.
     """
     if not isinstance(light_char, str) or len(light_char) != 1:
         raise AsciiMoonPhaseException('light_char must be a single character str')
@@ -89,11 +87,11 @@ def render_moon(
     height, width = size, size * 2
 
     theta = 2.0 * math.pi * phase  # 0=new, 2*pi=full
-    sx = -math.sin(theta) if northern_hemisphere else math.sin(theta)
+    sx = -math.sin(theta)
     sz = math.cos(theta)
 
-    # Precompute rotation values
-    rot_rad = math.radians(rotation)
+    # Negate rotation so positive degrees rotate clockwise on screen
+    rot_rad = math.radians(-rotation)
     cos_r, sin_r = math.cos(rot_rad), math.sin(rot_rad)
 
     rows: list[str] = []
@@ -121,37 +119,35 @@ def render_moon(
 
 
 def animate_phases(size: int = 24,
-    northern_hemisphere: bool = True,
+    rotation: float = 0.0,
     light_char: str = "@",
     dark_char: str = ".",
     empty_char: str = " ",
-    delay: float = 0.05,
-    rotation: float = 0.0):
+    delay: float = 0.05):
     """Play an animation of the phases of the moon. (Uses cls/clear to clear the screen.)"""
     import os, time
     try:
         while True:
             for i in range(200):
                 p = i / 200
-                print(render_moon(size=size, northern_hemisphere=northern_hemisphere, light_char=light_char, dark_char=dark_char, empty_char=empty_char, phase=p, rotation=rotation))
+                print(render_moon(size=size, rotation=rotation, light_char=light_char, dark_char=dark_char, empty_char=empty_char, phase=p))
                 time.sleep(delay)
                 os.system('cls' if os.name == 'nt' else 'clear')
     except KeyboardInterrupt:
         pass
 
 def animate_future(size: int = 24,
-    northern_hemisphere: bool = True,
+    rotation: float = 0.0,
     light_char: str = "@",
     dark_char: str = ".",
     empty_char: str = " ",
-    delay: float = 0.2,
-    rotation: float = 0.0):
+    delay: float = 0.2):
     """Play an animation of the phases of the moon for each day in the future. (Uses cls/clear to clear the screen.)"""
     import os, time
     try:
         dt = date.today()
         while True:
-            print(render_moon(size=size, northern_hemisphere=northern_hemisphere, light_char=light_char, dark_char=dark_char, empty_char=empty_char, phase_date=dt, rotation=rotation))
+            print(render_moon(size=size, rotation=rotation, light_char=light_char, dark_char=dark_char, empty_char=empty_char, phase_date=dt))
             print(dt.strftime('%a %b %d, %Y'))
             time.sleep(delay)
             os.system('cls' if os.name == 'nt' else 'clear')

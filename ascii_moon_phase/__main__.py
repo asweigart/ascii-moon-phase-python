@@ -15,13 +15,14 @@ def _parse_date(s: str) -> date:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        prog="ascii-moon",
+        prog="ascii-moon-phase",
         description="Render the lunar phase as filled ASCII art."
     )
     parser.add_argument("--size", type=int, default=24,
                         help="Height in rows (width is 2*size). Default: 24")
-    parser.add_argument("--hemisphere", choices=("north", "south"), default="north",
-                        help="Orientation: 'north' shows waxing on the right (default).")
+    parser.add_argument("--rotate", type=float, default=0.0, metavar="DEGREES",
+                        help="Clockwise rotation in degrees. At 0 (default), phases move "
+                             "right to left. At 180, phases move left to right.")
     parser.add_argument("--date", type=_parse_date, default=None,
                         help="Calendar date YYYY-MM-DD (default: today).")
     parser.add_argument("--phase", type=float, default=None,
@@ -38,51 +39,38 @@ def main() -> None:
                         help="Animate the full cycle of lunar phases.")
     parser.add_argument("--future", action="store_true",
                         help="Animate upcoming lunar phases.")
-    parser.add_argument("--lat", type=float, default=0.0, metavar="DEGREES",
-                        help="Observer latitude in degrees (-90 to 90). "
-                             "Rotates the moon to show how it appears from that latitude. "
-                             "Positive = North, Negative = South. Default: 0 (equator).")
 
     args = parser.parse_args()
-
-    # Validate latitude
-    if not (-90.0 <= args.lat <= 90.0):
-        parser.error("--lat must be between -90 and 90 degrees")
 
     # Handle special animation flags
     if args.phases:
         animate_phases(size=args.size,
-                       northern_hemisphere=(args.hemisphere == "north"),
+                       rotation=args.rotate,
                        light_char=args.light_char,
                        dark_char=args.dark_char,
-                       empty_char=args.empty_char,
-                       rotation=args.lat)
+                       empty_char=args.empty_char)
         return
 
     if args.future:
         animate_future(size=args.size,
-                       northern_hemisphere=(args.hemisphere == "north"),
+                       rotation=args.rotate,
                        light_char=args.light_char,
                        dark_char=args.dark_char,
-                       empty_char=args.empty_char,
-                       rotation=args.lat)
+                       empty_char=args.empty_char)
         return
 
     # Normal single moon rendering
     if args.phase is not None and not (0.0 <= args.phase <= 1.0):
         parser.error("--phase must be between 0.0 and 1.0")
 
-    northern = (args.hemisphere == "north")
-
     moon_str = render_moon(
         size=args.size,
-        northern_hemisphere=northern,
+        rotation=args.rotate,
         phase_date=args.date,
         light_char=args.light_char,
         dark_char=args.dark_char,
         empty_char=args.empty_char,
         phase=args.phase,
-        rotation=args.lat,
     )
     p = date_to_moon_phase(args.date)
 
